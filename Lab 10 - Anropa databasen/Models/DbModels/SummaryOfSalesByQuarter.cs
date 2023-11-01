@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Lab_10___Anropa_databasen.Models;
+namespace Lab_10___Anropa_databasen.Models.DbModels;
 
 public partial class SummaryOfSalesByQuarter
 {

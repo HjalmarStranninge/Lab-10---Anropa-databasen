@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Lab_10___Anropa_databasen.Models.DbModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace Lab_10___Anropa_databasen.Models;
+namespace Lab_10___Anropa_databasen.Data;
 
 public partial class NorthWindContext : DbContext
 {

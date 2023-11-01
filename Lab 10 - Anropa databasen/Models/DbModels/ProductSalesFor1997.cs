@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Lab_10___Anropa_databasen.Models;
+namespace Lab_10___Anropa_databasen.Models.DbModels;
 
-public partial class SalesByCategory
+public partial class ProductSalesFor1997
 {
-    public int CategoryId { get; set; }
-
     public string CategoryName { get; set; } = null!;
 
     public string ProductName { get; set; } = null!;
