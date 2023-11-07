@@ -27,8 +27,7 @@ namespace Lab_10___Anropa_databasen
                 string menuChoice = Console.ReadLine();
 
                 switch (menuChoice)
-                {
-                    
+                {                   
                     case "1":
 
                         // Asks the user in what order the list should be listed, 1 for asc and 2 for desc.
@@ -39,43 +38,64 @@ namespace Lab_10___Anropa_databasen
                         {
                             Console.Clear();
                             Console.WriteLine("Order list by [1]: Ascending or [2]: Descending?");
-                            userChoice = int.Parse(Console.ReadLine());
+
+                            // Checks for invalid input to prevent crashing.
+
+                            try
+                            {
+                                userChoice = int.Parse(Console.ReadLine());
+                            }
+                            catch
+                            {
+                                Console.Clear();
+                                Console.Write("Invalid input!");
+                                Thread.Sleep(1000);
+                            }
                         }
 
                         // Displays all the customers in a list.
+
                         DisplayCustomers(userChoice);
 
                         // The user is then asked to pick a customer in the list to display more info about that customer.
+
                         Console.Write("Select customer number to view more info: ");
-                        userChoice = int.Parse(Console.ReadLine());
+                        try
+                        {
+                            userChoice = int.Parse(Console.ReadLine());
+                        }
+                        
+                        // If you enter something that would normally crash the program,
+                        // the 'userChoice'-variable is set to an impossibly large number so that the search executes but never returns a result.
+
+                        catch
+                        {
+                            userChoice = 1000000000;
+                        }
 
                         DisplayAllCustomerInfo(userChoice);
 
-                        break;
-
-                    
+                    break;       
+                        
                     case "2":
-                      
+                        
                         AddCustomer();
-                        break;
+                    break;
 
                     case "3":
 
                         Environment.Exit(0);
-                        break;
+                    break;
 
                     default:
 
                         Console.Clear();
-                        Console.WriteLine("Invalid input!");
+                        Console.Write("Invalid input!");
                         Thread.Sleep(1000);
-                        break;
+                    break;
                 }
             }
-
         }
-
-
 
 
         // Method for listing all the customers.
@@ -88,6 +108,7 @@ namespace Lab_10___Anropa_databasen
                 List<Customer> customers;
 
                 // Depending on user input, the list is ordered in either ascending or descending order.
+
                 if (order == 1)
                 {
                     customers = context.Customers
@@ -106,6 +127,7 @@ namespace Lab_10___Anropa_databasen
 
                 // Using a for-loop to iterate through the list.
                 // This gives each customer a unique number which can be used to easily search for a specific customer later.
+
                 for (var i = 0; i < customers.Count(); i++)
                 {
                     Console.WriteLine($"{i}. {customers.ElementAt(i).CompanyName}\n\n" +
@@ -121,35 +143,60 @@ namespace Lab_10___Anropa_databasen
         // Method for displaying all the customer info for a specific customer.
         static void DisplayAllCustomerInfo(int search)
         {
+            // Resetting the cursor position before clearing, the second line is used to clear the scrollback buffer.
+
+            Console.Clear(); 
+            Console.Write("\x1b[3J");
+            Console.Write("Fetching customer information, please wait...");
+                
             using (var context = new NorthWindContext())
             {
                 var customers = context.Customers
                                 .Include(c => c.Orders)
                                 .ThenInclude(c=> c.OrderDetails)
+                                .ThenInclude(c => c.Product)
                                 .ToList();
 
                 // Variable for checking if a customer was found, and throwing an error message if not.
+
                 bool customerFound = false;
 
                 // Since we iterate through the list in the same manner as before, each customer will have the same unique index number.
                 // This index number becomes kind of a unique customer ID visible to the user,
                 // so that they can easily search for a specific customer in the list.
+
                 for (var i = 0; i < customers.Count(); i++)
                 {
                     if (search == i)
                     {
+
+                        // All info that is available about the customer is displayed.
                         Console.Clear();
                         Console.WriteLine($"{i}. {customers.ElementAt(i).CompanyName}\n\n" +
                             $"ADDRESS: {customers.ElementAt(i).Address} -  {customers.ElementAt(i).PostalCode} {customers.ElementAt(i).City}\n" +
                             $"COUNTRY/REGION: {customers.ElementAt(i).Country} / {customers.ElementAt(i).Region}\n" +
                             $"CONTACT PERSON: {customers.ElementAt(i).ContactName} - {customers.ElementAt(i).ContactTitle}\n" +
-                            $"PHONE/FAX: {customers.ElementAt(i).Phone} / {customers.ElementAt(i).Fax}\n" +
-                            $"ORDERS: ");
+                            $"PHONE/FAX: {customers.ElementAt(i).Phone} / {customers.ElementAt(i).Fax}\n\n" +
+                            $"\tALL ORDERS: \n");
 
-                        foreach(var orders in customers[i].Orders)
+                        // Iterating through all orders, showing order id and date.
+                        foreach(var order in customers[i].Orders)
                         {
+                            Console.WriteLine($"Order: {order.OrderId}");
+                            Console.WriteLine($"Order date: {order.OrderDate}");
+                            Console.WriteLine();
 
+                            // For each order, we iterate 
+                            foreach (var orderDetail in order.OrderDetails)
+                            {
+                                Console.WriteLine($"Product name: {orderDetail.Product.ProductName}");
+                                Console.WriteLine($"Price per unit: {(int)orderDetail.UnitPrice}:-");
+                                Console.WriteLine($"Amount on order: {orderDetail.Quantity}");
+                                Console.WriteLine();
+                            }
+                            Console.WriteLine("\n");
                         }
+
                         Console.Write("Press ENTER to continue: ");
                         Console.ReadLine();
 
@@ -165,7 +212,6 @@ namespace Lab_10___Anropa_databasen
                     Console.ReadLine();
                 }
             }
-
         }
 
 
@@ -181,6 +227,7 @@ namespace Lab_10___Anropa_databasen
             {
 
                 // User is asked to enter info. A custom method is used to set the property and set it to 'null' if nothing is entered.
+
                 Customer customer = new Customer();
 
                 Console.Write("Enter company name: ");
@@ -223,6 +270,7 @@ namespace Lab_10___Anropa_databasen
 
 
         // Method for checking if the user entered a value and returning that value, if nothing is entered, it returns null.
+
         static string SetProperty()
         {
             string userInput = Console.ReadLine();
@@ -238,6 +286,7 @@ namespace Lab_10___Anropa_databasen
 
 
         // Generates an ID based on the name by removing all spaces and capitalizing the whole name extracting the 5 first letters.
+
         static string GenerateID(string name)
         {
             name = name.Replace(" ", "").ToUpper();
